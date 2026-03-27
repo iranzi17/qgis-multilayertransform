@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="/plugins/multilayertransform/icons">
+    <file>icons/quick_select.svg</file>
+    <file>icons/identify.svg</file>
+    <file>icons/move.svg</file>
+    <file>icons/rotate.svg</file>
+    <file>icons/scale.svg</file>
+    <file>icons/multilayer_transform.svg</file>
+    <file>icons/orthogonalize.svg</file>
+  </qresource>
+</RCC>
