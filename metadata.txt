@@ -2,7 +2,7 @@
 name=MultiLayerTransform
 qgisMinimumVersion=3.40
 description=Quick-select, identify, select, move, rotate, scale, and orthogonalize features across multiple vector layers with ArcGIS Pro-style targeting and preview.
-version=0.8.1
+version=0.8.2
 author=Eng.Iranzi Prince
 email=iranziprince35@gmail.com
 about=Production-ready QGIS plugin for multi-layer quick-select, identify, selection, move, rotate, scale, and orthogonalize-four-points workflows with in-dock layer targeting, popup identify results with attribute tree, hover tracing, preview, pivot control, numeric factors, and undo-safe editing.
@@ -15,4 +15,4 @@ homepage=https://github.com/iranzi17/qgis-multilayertransform
 tracker=https://github.com/iranzi17/qgis-multilayertransform/issues
 repository=https://github.com/iranzi17/qgis-multilayertransform
 plugin_dependencies=
-changelog=0.8.1 - Added ArcGIS Pro-style quick select, popup identify results, hover selection tracing, multi-layer scale, orthogonalize, snapping-aware identify, and safer activation/deactivation behavior.
+changelog=0.8.2 - Prepared public release metadata, GitHub repository links, PNG repository icon, and GPL licensing for QGIS plugin repository submission.
