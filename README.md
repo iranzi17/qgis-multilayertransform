@@ -1,169 +1,75 @@
 # MultiLayerTransform
 
-MultiLayerTransform is a QGIS 3.40+ Python plugin for quick-selecting, identifying, selecting, moving, rotating, and scaling features across multiple visible vector layers as grouped workflows.
+MultiLayerTransform is a QGIS plugin for people who regularly edit features that are split across more than one layer.
 
-## Architecture
+Instead of switching the active layer over and over, you can work with visible layers as a group. The plugin gives you quick select, identify, box selection, move, rotate, scale, and four-point orthogonalize tools in one dock, with live preview before you commit the edit.
 
-The plugin is split into three main pieces:
+## Why it exists
 
-- `multilayer_transform.py` registers the plugin, creates toolbar/menu actions, owns the dock widget, and connects UI events to the map tool.
-- `transform_dialog.py` provides the main dock widget for mode selection, selection operation, target layer checklist, pivot behavior, angle snapping, preview color, manual angle/scale entry, and apply/cancel actions.
-- `identify_results_dialog.py` provides the popup-style Identify Results dock with a feature/value tree similar to QGIS's standard identify panel.
-- `transform_map_tool.py` implements the custom `QgsMapTool` that gathers eligible identify/selection targets, builds rubber-band previews in project coordinates, and commits undo-safe geometry edits back to each layer.
+QGIS is very strong for editing, but some day-to-day jobs become slower when the features you need are spread across several layers. This plugin was built to remove that friction:
 
-The map tool computes one transformation in project/map coordinates and applies that same transform to every selected feature across all eligible layers. For mixed-layer CRS projects, feature geometries are temporarily transformed into the project CRS, previewed/transformed there, and then transformed back into each source layer CRS before writing the edit.
+- identify a feature without first making its layer active
+- select from several visible layers in one pass
+- move, rotate, or scale selected features together as one group
+- keep the edit workflow inside QGIS instead of jumping between tools
 
-## Features
+## Main tools
 
-- Quick Select the top visible feature across multiple visible vector layers without first making a layer active in the Layers panel.
-- Identify visible features across multiple visible vector layers without first making a layer active in the Layers panel.
-- Select features across multiple visible vector layers with click or drag-box workflows.
-- Move selected features across multiple visible editable vector layers together.
-- Rotate selected features across multiple visible editable vector layers together.
-- Scale selected features across multiple visible editable vector layers together.
-- Works with point, line, polygon, and multipart geometries.
-- Uses a single group transform, preserving relative arrangement between all selected features.
-- Supports centroid pivot and user-picked pivot for rotation and scaling.
-- Supports manual angle preview and numeric X/Y scale preview from the dock.
-- Shows live hover tracing in selection workflows so you can see the feature under the cursor before you click.
-- Shows identify results in a popup-style dock, with attribute tree, highlight, zoom-to, and feature-form opening.
-- Shows live rubber-band previews before commit.
-- Uses layer edit commands so changes can be undone and redone.
-- Warns when the project CRS is geographic.
-- Optional filters and helpers:
-  - checked target layers from the dock
-  - pivot marker display
-  - preview color customization
-  - Shift to constrain rotation
-  - Ctrl to duplicate and transform instead of editing originals
+- **Quick Select** picks the top visible feature under the cursor across target layers.
+- **Identify** opens a popup-style results panel with feature attributes, derived values, and actions.
+- **Select** supports click and drag-box selection across visible target layers.
+- **Move**, **Rotate**, and **Scale** apply one grouped transform to selected features from different editable layers.
+- **Orthogonalize 4 points** squares up four selected points into a clean rectangle preview before applying the result.
 
-## Folder Structure
+## Editing behavior
 
-```text
-MultiLayerTransform/
-  __init__.py
-  metadata.txt
-  identify_results_dialog.py
-  multilayer_transform.py
-  transform_map_tool.py
-  transform_dialog.py
-  resources.qrc
-  resources.py
-  README.md
-  icons/
-    quick_select.svg
-    identify.svg
-    move.svg
-    rotate.svg
-    scale.svg
-    orthogonalize.svg
-    multilayer_transform.svg
-```
+- visible target layers can be filtered from the dock
+- hover tracing shows what feature is under the cursor before you click
+- identify can use snapping to be more precise
+- move, rotate, and scale support preview before apply
+- rotation and scaling can use centroid or a picked pivot
+- Ctrl can duplicate and transform instead of editing the original features
+- edits are written through QGIS layer edit commands, so undo and redo stay clean
 
 ## Installation
 
-1. Close QGIS if you want to copy directly into a profile folder.
-2. Copy the `MultiLayerTransform` folder into your QGIS profile plugin directory.
-3. Start QGIS.
-4. Open `Plugins > Manage and Install Plugins...`.
-5. Enable `MultiLayerTransform`.
+Install from ZIP through `Plugins > Manage and Install Plugins... > Install from ZIP`, or copy the `MultiLayerTransform` folder into your QGIS profile plugin directory and restart QGIS.
 
-Typical plugin folder locations:
+Typical plugin locations:
 
 - Windows: `%APPDATA%\\QGIS\\QGIS3\\profiles\\default\\python\\plugins\\`
 - Linux: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
 - macOS: `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/`
 
-## Zip And Install
+## Typical workflow
 
-To install as a zip package:
+1. Open the plugin dock.
+2. Check only the layers you want to target, if needed.
+3. Use **Quick Select**, **Identify**, or **Select** to gather the features you want.
+4. Put the relevant layers into edit mode.
+5. Switch to **Move**, **Rotate**, **Scale**, or **Orthogonalize 4 points**.
+6. Review the preview, then apply the result.
 
-1. Make sure the zip contains the top-level folder `MultiLayerTransform`.
-2. From the parent directory, create a zip of that folder.
-3. In QGIS, open `Plugins > Manage and Install Plugins... > Install from ZIP`.
-4. Pick the generated zip file and install it.
+## Notes
 
-Example PowerShell command from the parent folder:
+- The best results come from working in a projected project CRS.
+- Transform tools only use editable visible vector layers that currently have selected features.
+- Raster layers, hidden layers, and non-editable layers are ignored.
+- Cross-layer edits are grouped per layer for reliable QGIS undo and redo behavior.
 
-```powershell
-Compress-Archive -Path .\MultiLayerTransform -DestinationPath .\MultiLayerTransform.zip -Force
-```
+## Project files
 
-## Usage
+- `multilayer_transform.py` wires the plugin into QGIS and manages the main dock
+- `transform_dialog.py` builds the dock controls
+- `transform_map_tool.py` contains the cross-layer selection, identify, preview, and transform logic
+- `identify_results_dialog.py` provides the identify results panel
 
-1. Open the plugin dock and optionally check only the target layers you want to use.
-2. For **Quick Select**:
-   - switch to **Quick Select** mode
-   - click the top visible feature under the cursor
-   - the tool selects it across layers without requiring an active layer
-3. For **Identify**:
-   - switch to **Identify** mode
-   - click any visible feature
-   - review the result list and double-click an item to open its feature form
-4. For **Select**:
-   - switch to **Select** mode
-   - click-select or drag a rectangle across multiple layers
-   - use Shift to add and Ctrl to remove, or change the default selection operation in the dock
-5. Put the target vector layers into edit mode when you want to move, rotate, or scale them.
-6. Switch to **Move**, **Rotate**, or **Scale** mode.
-7. Use the dock to choose pivot behavior, snap angle, scale factors, and other options.
-8. For move:
-   - click a reference point
-   - move the cursor
-   - click again to apply
-9. For rotate with centroid pivot:
-   - click a reference direction from the pivot
-   - move the cursor around the pivot
-   - click again to apply
-10. For rotate with picked pivot:
-   - click the pivot point
-   - click a reference direction
-   - move the cursor and click again to apply
-11. For scale with centroid pivot:
-   - click a reference distance from the pivot
-   - move the cursor closer/farther from the pivot
-   - click again to apply a proportional group scale
-12. For scale with picked pivot:
-   - click the pivot point
-   - click a reference distance
-   - move the cursor and click again to apply
-13. Use `Preview angle` for manual rotation preview or `Preview scale` for numeric X/Y scale preview, then `Apply`.
-14. Press `Esc` or use `Cancel` to clear the current preview.
-15. Use Ctrl on the final move/rotate/scale click if you want to duplicate and transform instead of changing the originals.
+## Current release
 
-## Notes And Limitations
+Version `0.8.3` focuses on the public release build and the full cross-layer toolset:
 
-- Best accuracy is achieved in a projected project CRS. The plugin warns if the project CRS is geographic.
-- Quick Select, Identify, and Select search visible target vector layers. Transform modes only include editable visible vector layers that currently have selected features.
-- Raster layers, hidden layers, uneditable layers, and layers without selected features are ignored.
-- Z and M values are preserved when supported by QGIS geometry and CRS transformation handling, but the transform logic is still driven by 2D map coordinates.
-- Cross-layer edits are grouped as per-layer edit commands. This gives clean undo/redo behavior in QGIS, but it is not a provider-level database transaction across all layers.
-
-## Future Improvements
-
-- Optional non-destructive ghosting of original geometry during preview.
-- Explicit selection handoff to duplicated features.
-- Additional snapping presets and angle locking shortcuts.
-- Persistent settings storage for dock options.
-- Optional support for numeric move offsets entered directly in the dock.
-
-
-## New in this build
-
-- Added **Quick Select** mode for ArcGIS-Pro-style click selection of the top visible feature across layers without requiring an active layer.
-- Quick Select honors the existing Replace/Add/Remove selection operation and modifier keys.
-- Added **Identify** mode that searches all visible target layers, not just the layer currently active in the Layers panel.
-- Identify results now open in a popup-style Identify Results dock and show full attribute rows in a Feature/Value tree.
-- Direct drag-move in **Move** mode: click-drag from any currently selected feature to move the whole multi-layer selection together.
-- Keep **Ctrl** pressed on release to duplicate while moving.
-- The earlier two-click move workflow is still available when you start from an empty location.
-- Added **Scale** mode with centroid or picked pivot, live preview, and numeric X/Y scale factors.
-- Scale applies as one grouped transform across selected editable features from different visible vector layers.
-
-
-## New in 0.5.0
-
-- Added **Orthogonalize 4 points** mode.
-- Works across multiple editable visible point layers.
-- Select exactly four point features, switch to Orthogonalize, review the preview rectangle, then click **Apply**.
-- Ctrl while applying duplicates the selected points to the orthogonalized corners instead of moving the originals.
+- Quick Select across visible layers
+- snapping-aware Identify with attribute popup
+- hover tracing during selection
+- grouped Move, Rotate, and Scale across layers
+- four-point Orthogonalize
